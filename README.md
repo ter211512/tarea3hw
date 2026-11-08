@@ -138,3 +138,27 @@ Esquema de Pines, Decisiones Técnicas y Declaración de IA
    * El Esclavo hace parpadear sus LEDs X e Y de manera alternada (500 ms)[cite: 4].
    * El Maestro aborta la partida activa, vuelve a `INACTIVO`, muestra "ENLACE PERDIDO" en el LCD y titila el LED verde a 250 ms[cite: 4].
    * La reconexión física restablece el sistema de forma automática sin necesidad de reiniciar las placas[cite: 5].
+
+---
+
+## 4. Roles y Componentes del Sistema
+
+| Placa | Componentes | Responsabilidades |
+| :--- | :--- | :--- |
+| **Esclavo (Joystick)** | 2 potenciómetros de 10k, pulsador de inicio (`INPUT_PULLUP`), 2 LEDs (Eje X y Eje Y), resistencias limitadoras de corriente. | Leer y filtrar ambos ejes; enviar X, Y y la solicitud de inicio; recibir el código del Maestro y mostrar el nivel de cada eje en su LED (PWM); detectar la pérdida de enlace. |
+| **Maestro (Juego)** | LED verde (PWM para temporizador), pantalla LCD 16x2 con módulo I2C, resistencias limitadoras. | Máquina de estados; definir la posición aleatoria del tesoro (2x2); cálculo de distancias y niveles; temporizador (60 s); decisión de victoria o derrota; envío periódico de códigos al Esclavo. |
+
+---
+
+## 5. Diagrama Esquemático y Distribución de Pines
+
+```text
+[ MÓDULO ESCLAVO - JOYSTICK ]                     [ MÓDULO MAESTRO - JUEGO Y LCD ]
+  A0 <--- Potenciómetro Eje X                        Pin 9 (PWM) ---> Ánodo (+) LED Verde (Timer)
+  A1 <--- Potenciómetro Eje Y                        A4 (SDA)    ---> Pin SDA de Pantalla LCD 16x2 I2C
+  Pin 2 <--- Pulsador Inicio (INPUT_PULLUP a GND)    A5 (SCL)    ---> Pin SCL de Pantalla LCD 16x2 I2C
+  Pin 5 (PWM) ---> Ánodo (+) LED X                   A0 (Libre)  ---> Lectura analógica al aire (randomSeed)
+  Pin 6 (PWM) ---> Ánodo (+) LED Y
+  Pin 10 (RX) <======================================== Pin 11 (TX)
+  Pin 11 (TX) ========================================> Pin 10 (RX)
+  GND ================================================= GND (Tierra de referencia común)
