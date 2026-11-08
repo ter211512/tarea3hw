@@ -13,7 +13,8 @@ El juego sitúa un tesoro virtual de $2 \times 2$ celdas dentro de una grilla de
 
 ## 2. Diagrama de la Máquina de Estados del Maestro
 
-       +---------------------------------------+
+     ```text
+                     +---------------------------------------+
                      |               INACTIVO                | <--------------------------+
                      |  - LED Verde apagado                  |                            |
                      |  - LCD: "Pulsa Inicio"                |                            |
@@ -22,15 +23,15 @@ El juego sitúa un tesoro virtual de $2 \times 2$ celdas dentro de una grilla de
                                          | Pulsador Esclavo (Byte 0xFF)                   |
                                          v                                                |
                      +---------------------------------------+                            |
-  +----------------> |                JUGANDO                |                            |
-  |                  |  - Temporizador activo (60 s)         |                            |
-  |                  |  - Atenuacion PWM de LED Verde        |                            |
-  |                  |  - Mapeo de niveles (Frio -> Aqui)    |                            |
-  |                  |  - Despliegue de datos en LCD I2C     |                            |
-  |                  +---------------------------------------+                            |
-  |                                |                   |                                  |
-dx=0 y dy=0                        |                   | Tiempo >= 60 s                   |
-continuo por 2000 ms               v                   v                                  |
+         +----------------> |                JUGANDO                |                            |
+         |                  |  - Temporizador activo (60 s)         |                            |
+         |                  |  - Atenuacion PWM de LED Verde        |                            |
+         |                  |  - Mapeo de niveles (Frio -> Aqui)    |                            |
+         |                  |  - Despliegue de datos en LCD I2C     |                            |
+         |                  +---------------------------------------+                            |
+         |                                |                   |                                  |
+       dx=0 y dy=0                        |                   | Tiempo >= 60 s                   |
+       continuo por 2000 ms               v                   v                                  |
                      +-------------------+   +-------------------+                        |
                      |     VICTORIA      |   |      DERROTA      |                        |
                      | - LED Verde 100%  |   | - LED Verde titila|                        |
@@ -43,8 +44,3 @@ continuo por 2000 ms               v                   v                        
                                            |                                              |
                                            | Animacion finalizada (5 segundos)            |
                                            +----------------------------------------------+
-
-
-
-
-                                         
