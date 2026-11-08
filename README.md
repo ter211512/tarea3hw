@@ -110,3 +110,31 @@ Esquema de Pines, Decisiones Técnicas y Declaración de IA
              | 5V / GND   ---> VCC / GND del Módulo I2C LCD
              | A0 (Libre) ---> Ruido analógico al aire para randomSeed()
            +---------------------------------------+
+     | Distancia d por eje | Nivel (Código) | Binario | Significado | Brillo PWM en LED Esclavo |
+     | :--- | :--- | :--- | :--- | :--- |
+     | d > 10 | FRÍO | 00 (0) | Lejos del objetivo | 0 (Apagado) |
+     | 5 <= d <= 10 | TIBIO | 01 (1) | Aproximándose | 20 (Tenue) |
+     | 1 <= d <= 5 | CALIENTE | 10 (2) | Muy cerca | 80 (Medio) |
+     | d = 0 | AQUÍ | 11 (3) | Sobre el tesoro | 255 (Brillo máximo) |
+
+1. **Conversión ADC Uniforme (10 bits a rango 0-100):**  
+   Se descartó el uso de `map(val, 0, 1023, 0, 100)` debido a que la división entera truncada concentra el valor 100 únicamente en la lectura máxima 1023[cite: 5]. Se utilizó la relación matemática uniforme:
+
+   $$\text{Coord} = \frac{\text{Lectura} \times 100}{1023}$$
+
+   distribuyendo de forma equitativa los 1024 pasos del convertidor en las 101 celdas[cite: 5].
+
+2. **Estabilización del Multiplexor Analógico:**  
+   Al alternar la lectura analógica entre `A0` (Eje X) y `A1` (Eje Y), se descarta la primera lectura tras conmutar el canal para descargar el condensador del circuito *Sample & Hold* interno del microcontrolador ATmega328P, evitando diafonía entre ejes[cite: 5].
+
+3. **Filtro de Ruido por Software:**  
+   Se aplica un promedio de 4 lecturas consecutivas sobre cada eje antes de enviar las coordenadas, erradicando fluctuaciones indeseadas con las perillas en reposo[cite: 5].
+
+4. **Temporización No Bloqueante con `millis()`:**  
+   Todo el control periódico (muestreo ADC, atenuación del temporizador, animaciones y sondeo serial) se implementa sin retardos bloqueantes (`delay()`), asegurando una respuesta inmediata de la máquina de estados[cite: 5].
+
+5. **Detección de Pérdida de Enlace (Timeout de 2000 ms):**  
+   Si cualquiera de las dos placas deja de recibir paquetes válidos durante más de 2000 ms, entran en estado de falla[cite: 5]:
+   * El Esclavo hace parpadear sus LEDs X e Y de manera alternada (500 ms)[cite: 4].
+   * El Maestro aborta la partida activa, vuelve a `INACTIVO`, muestra "ENLACE PERDIDO" en el LCD y titila el LED verde a 250 ms[cite: 4].
+   * La reconexión física restablece el sistema de forma automática sin necesidad de reiniciar las placas[cite: 5].
